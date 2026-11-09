@@ -33,7 +33,7 @@
     <header class="masthead">
       <a class="brand" href="./" aria-label="Sudoku home"><span class="brand-icon" aria-hidden="true">▦</span> sudoku<span class="brand-dot">.</span></a>
       <div class="header-actions">
-        <label class="theme-picker" for="theme"><span>Theme</span><select id="theme" aria-label="Color theme"><option value="forest">Forest</option><option value="blue">Bright blue</option><option value="lavender">Lavender</option><option value="cobalt">Bold cobalt</option><option value="amber">Amber ink</option><option value="plum">Deep plum</option></select></label>
+        
         <button class="settings-button" id="open-settings" aria-haspopup="dialog"><span aria-hidden="true">⚙</span> Settings</button>
       </div>
     </header>
@@ -54,6 +54,7 @@
   <dialog id="new-dialog"><h2>New puzzle?</h2><p>This replaces your current puzzle.</p><label for="new-difficulty">Difficulty</label><select id="new-difficulty"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select><div class="dialog-actions"><button id="cancel-new">Cancel</button><button class="dialog-primary" id="confirm-new">New puzzle</button></div></dialog>
   <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
     <h2 id="settings-title">Display</h2>
+    <div class="setting setting-theme"><label for="theme">Theme</label><select id="theme"><option value="forest">Forest</option><option value="blue">Bright blue</option><option value="lavender">Lavender</option><option value="cobalt">Bold cobalt</option><option value="amber">Amber ink</option><option value="plum">Deep plum</option></select></div>
     <div class="setting"><label for="number-size">Number size</label><output id="number-size-value" for="number-size"></output><input type="range" id="number-size" min="70" max="140" step="5"></div>
     <div class="setting"><label for="cell-line">Cell lines</label><output id="cell-line-value" for="cell-line"></output><input type="range" id="cell-line" min="1" max="4" step="0.5"></div>
     <div class="setting"><label for="box-line">Box lines</label><output id="box-line-value" for="box-line"></output><input type="range" id="box-line" min="2" max="8" step="1"></div>

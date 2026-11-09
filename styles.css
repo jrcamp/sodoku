@@ -29,7 +29,6 @@
 :root[data-theme="cobalt"]{--accent:#003fa3;--ink:#071b38;--background:#e4edff;--muted:#344966;--line:#6885b0;--paper:#ffffff;--highlight:#87c9ff;--key:#c1d8ff;--strong-line:#193d72;--cell-line:#8199b8;--entry:#00378c}
 :root[data-theme="amber"]{--accent:#713500;--ink:#271900;--background:#fff3d4;--muted:#604821;--line:#9b7d43;--paper:#fffef8;--highlight:#ffd05a;--key:#ffe3a0;--strong-line:#61451b;--cell-line:#a49470;--entry:#713500}
 :root[data-theme="plum"]{--accent:#681361;--ink:#2b0c2c;--background:#f4e5f3;--muted:#66415f;--line:#a0789a;--paper:#ffffff;--highlight:#e8a4de;--key:#f0c8e9;--strong-line:#65355f;--cell-line:#ab89a5;--entry:#681361}
-:root:is([data-theme="cobalt"],[data-theme="amber"],[data-theme="plum"]) .cell{font-weight:600}
 :root:is([data-theme="cobalt"],[data-theme="amber"],[data-theme="plum"]) .number-key small{opacity:1}
 
 /* Game-only layout: use the space previously occupied by captions for the board. */
@@ -91,4 +90,17 @@
 .setting label{font-size:13px}
 .setting output{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .setting input[type=range]{grid-column:1/-1;width:100%;min-height:36px;margin:0;accent-color:var(--accent)}
-@media(max-width:600px){.settings-button{padding:0 10px}.settings-button{font-size:0;gap:0}.settings-button span{font-size:20px}.settings-dialog{margin:auto auto max(16px,env(safe-area-inset-bottom));width:calc(100% - 24px)}}
+@media(max-width:600px){.settings-dialog{margin:auto auto max(16px,env(safe-area-inset-bottom));width:calc(100% - 24px)}}
+
+/* Visual polish: clearer highlights, givens vs entries, and number pad state. */
+.cell{font-weight:700}
+.cell.entered{font-weight:400}
+:root:not([data-theme]),:root[data-theme="forest"]{--entry:#1f7f9a}
+.cell.match{background:color-mix(in srgb,var(--accent) 22%,var(--highlight))}
+.number-key{font-weight:600}
+.number-key small{font-size:11px;font-weight:600;opacity:.8}
+.number-key.done:not([aria-pressed=true]){background:transparent;border-style:dashed;color:var(--muted);opacity:.6}
+.number-key.done small{font-size:12px}
+@media(max-width:600px){.number-key small{font-size:9px}}
+.settings-dialog select{margin:4px 0 0;grid-column:1/-1;background:var(--paper);color:var(--ink)}
+@media(max-width:600px){.settings-dialog{padding:16px 18px}.settings-dialog h2{font-size:21px;margin:0 0 8px}.setting{margin-bottom:8px}.setting input[type=range]{min-height:28px}.settings-dialog select{min-height:40px}.settings-dialog .dialog-actions button{min-height:44px;padding-top:10px;padding-bottom:10px}}

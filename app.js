@@ -79,6 +79,7 @@ function render() {
   keys.forEach((button, i) => {
     const remaining = 9 - game.values.filter(n => n === i + 1).length;
     button.innerHTML = `${i + 1}<small aria-hidden="true">${remaining || '✓'}</small>`;
+    button.classList.toggle('done', remaining === 0);
     button.setAttribute('aria-pressed', String(selected === i + 1));
     button.setAttribute('aria-label', `${i + 1}, ${remaining} remaining`);
   });
