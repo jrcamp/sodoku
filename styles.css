@@ -72,3 +72,23 @@
   .edit-controls{margin-top:14px}
   .new-game{margin-top:14px}
 }
+
+/* Display settings: number size and grid line thickness (set in the Settings panel). */
+:root{--number-scale:1;--cell-line-width:1px;--box-line-width:3px}
+.board{border-width:var(--box-line-width)}
+.cell{border-right-width:var(--cell-line-width);border-bottom-width:var(--cell-line-width);font-size:clamp(calc(26px * var(--number-scale)),calc(7cqw * var(--number-scale)),calc(80px * var(--number-scale)))}
+.cell:nth-child(3n){border-right-width:var(--box-line-width)}
+.cell:nth-child(9n){border-right-width:0}
+.cell:nth-child(n+19):nth-child(-n+27),.cell:nth-child(n+46):nth-child(-n+54){border-bottom-width:var(--box-line-width)}
+.cell:nth-child(n+73){border-bottom-width:0}
+.settings-button{min-height:44px;border:1px solid var(--line);border-radius:8px;padding:0 14px;background:var(--paper);color:var(--ink);font-size:12px;display:flex;align-items:center;gap:6px}
+.settings-button span{font-size:18px;line-height:1}
+/* Sits beside the board, without blur, so changes can be previewed live. */
+.settings-dialog{margin:max(84px,calc(env(safe-area-inset-top) + 70px)) max(20px,env(safe-area-inset-right)) auto auto;width:min(340px,calc(100% - 32px));padding:24px}
+.settings-dialog::backdrop{background:transparent;backdrop-filter:none}
+.settings-dialog h2{font-size:26px;margin:0 0 14px}
+.setting{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 12px;margin-bottom:18px}
+.setting label{font-size:13px}
+.setting output{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.setting input[type=range]{grid-column:1/-1;width:100%;min-height:36px;margin:0;accent-color:var(--accent)}
+@media(max-width:600px){.settings-button{padding:0 10px}.settings-button{font-size:0;gap:0}.settings-button span{font-size:20px}.settings-dialog{margin:auto auto max(16px,env(safe-area-inset-bottom));width:calc(100% - 24px)}}

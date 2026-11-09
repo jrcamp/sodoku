@@ -6,6 +6,8 @@ A dependency-free, installable Sudoku PWA designed for iPad. Large numbers, calm
 
 Use the header’s **Theme** picker for Forest, Bright blue, or Lavender, plus higher-contrast Bold cobalt, Amber ink, and Deep plum. The higher-contrast options use darker numbers, stronger grid lines, and more saturated highlights. The choice is saved on this device and works offline.
 
+**Settings** (next to Theme) adjusts number size (70–140%), cell line thickness, and 3×3 box line thickness. Changes preview live on the board and are saved on this device.
+
 - Choose a number, then tap a square to place it. **Every instance of the selected number lights up**, including starting clues and your entries.
 - An incorrect number flashes the square and board border red and announces an error. The incorrect entry is not kept.
 - Choose **Erase**, then tap one of your entries. **Undo** restores the previous change, including an erase.

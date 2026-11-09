@@ -13,6 +13,38 @@ $('theme').addEventListener('change', event => {
   applyTheme(event.target.value);
   try { localStorage.setItem('sudoku-theme', event.target.value); } catch { /* Theme still applies for this visit. */ }
 });
+const displayKey = 'sudoku-display';
+const displaySettings = {
+  numberSize: { min: 70, max: 140, default: 100, input: 'number-size', css: '--number-scale', css_value: v => v / 100, label: v => `${v}%` },
+  cellLine: { min: 1, max: 4, default: 1, input: 'cell-line', css: '--cell-line-width', css_value: v => `${v}px`, label: v => `${v} px` },
+  boxLine: { min: 2, max: 8, default: 3, input: 'box-line', css: '--box-line-width', css_value: v => `${v}px`, label: v => `${v} px` }
+};
+function cleanDisplay(saved) {
+  const out = {};
+  for (const [key, spec] of Object.entries(displaySettings)) {
+    const value = Number(saved?.[key]);
+    out[key] = saved?.[key] != null && Number.isFinite(value) ? Math.min(spec.max, Math.max(spec.min, value)) : spec.default;
+  }
+  return out;
+}
+let display;
+try { display = cleanDisplay(JSON.parse(localStorage.getItem(displayKey))); } catch { display = cleanDisplay(); }
+function applyDisplay() {
+  for (const [key, spec] of Object.entries(displaySettings)) {
+    document.documentElement.style.setProperty(spec.css, spec.css_value(display[key]));
+    $(spec.input).value = display[key];
+    $(`${spec.input}-value`).textContent = spec.label(display[key]);
+  }
+}
+function saveDisplay() { try { localStorage.setItem(displayKey, JSON.stringify(display)); } catch { /* Settings still apply for this visit. */ } }
+for (const [key, spec] of Object.entries(displaySettings)) {
+  $(spec.input).addEventListener('input', event => { display[key] = Number(event.target.value); applyDisplay(); saveDisplay(); });
+}
+applyDisplay();
+$('open-settings').addEventListener('click', () => $('settings-dialog').showModal());
+$('close-settings').addEventListener('click', () => $('settings-dialog').close());
+$('reset-settings').addEventListener('click', () => { display = cleanDisplay(); applyDisplay(); saveDisplay(); });
+$('settings-dialog').addEventListener('click', event => { if (event.target === event.currentTarget) event.currentTarget.close(); });
 let selected = 1, game;
 try { const saved = JSON.parse(localStorage.getItem(storageKey)); if (validSavedGame(saved)) game = saved; } catch { /* Storage may be unavailable or corrupt. */ }
 game ||= createPuzzle('easy');
