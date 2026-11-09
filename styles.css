@@ -104,3 +104,47 @@
 @media(max-width:600px){.number-key small{font-size:9px}}
 .settings-dialog select{margin:4px 0 0;grid-column:1/-1;background:var(--paper);color:var(--ink)}
 @media(max-width:600px){.settings-dialog{padding:16px 18px}.settings-dialog h2{font-size:21px;margin:0 0 8px}.setting{margin-bottom:8px}.setting input[type=range]{min-height:28px}.settings-dialog select{min-height:40px}.settings-dialog .dialog-actions button{min-height:44px;padding-top:10px;padding-bottom:10px}}
+
+/* Motion: short, quiet transitions. All disabled for reduced-motion users. */
+.cell{transition:background-color .2s ease,color .2s ease}
+.cell .digit{display:inline-block}
+.cell.placed .digit{animation:digit-pop .28s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes digit-pop{from{transform:scale(.55);opacity:0}to{transform:none;opacity:1}}
+.number-key,.edit-controls button,.new-game,.settings-button{transition:background-color .18s ease,color .18s ease,border-color .18s ease,opacity .25s ease,transform .12s ease,box-shadow .18s ease}
+.number-key:active,.edit-controls button:active:not(:disabled),.new-game:active,.settings-button:active{transform:scale(.96)}
+dialog[open]{animation:dialog-in .2s ease-out}
+dialog[open]::backdrop{animation:backdrop-in .2s ease-out}
+@keyframes dialog-in{from{opacity:0;transform:translateY(10px) scale(.98)}}
+@keyframes backdrop-in{from{opacity:0}}
+.board.fresh .digit{animation:digit-fade .35s ease-out both;animation-delay:calc(var(--i) * 22ms)}
+@keyframes digit-fade{from{opacity:0;transform:translateY(4px)}}
+.board.complete .cell{animation:complete-wave .7s ease-in-out both;animation-delay:calc(var(--i) * 45ms)}
+@keyframes complete-wave{40%{background:color-mix(in srgb,var(--accent) 28%,var(--paper))}}
+.message.success{animation:digit-fade .4s ease-out}
+@media(prefers-reduced-motion:reduce){
+  .cell,.number-key,.edit-controls button,.new-game,.settings-button{transition:none}
+  .cell.placed .digit,.board.fresh .digit,.board.complete .cell,dialog[open],dialog[open]::backdrop,.message.success{animation:none}
+  .number-key:active,.edit-controls button:active,.new-game:active,.settings-button:active{transform:none}
+}
+
+.debug-dialog p{margin:0 0 14px;font-size:13px}
+.debug-actions{display:grid;gap:8px;margin-bottom:18px}
+.debug-actions button{min-height:44px;border:1px solid var(--line);border-radius:8px;background:var(--key);text-align:left;padding:0 14px;font-size:13px}
+.debug-dialog .dialog-actions .dialog-primary{background:var(--green);color:#fff;padding:14px 20px;border-radius:8px}
+
+/* Celebration */
+.game-area{position:relative}
+.celebration{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:2}
+.celebration[hidden]{display:none}
+.celebration-card{pointer-events:auto;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:26px 30px 24px;text-align:center;width:min(340px,86%);box-shadow:0 24px 70px #14291d33;animation:card-in .45s cubic-bezier(.2,.9,.3,1.25)}
+.celebration-card h2{margin:0 0 6px;font-size:38px}
+.celebration-card p{margin:0;color:var(--muted);font-size:14px}
+.celebration-mark{font-size:26px;color:var(--accent)!important;margin-bottom:2px!important;animation:mark-spin 1.2s ease-out}
+.celebration-actions{display:flex;gap:10px;justify-content:center;margin-top:20px}
+.celebration-actions button{min-height:46px;border-radius:8px;padding:0 18px;font-size:14px}
+.celebration-actions button:first-child{border:1px solid var(--line);background:transparent}
+.celebration-actions .dialog-primary{background:var(--green);color:#fff;border:0}
+@keyframes card-in{from{opacity:0;transform:translateY(14px) scale(.92)}}
+@keyframes mark-spin{from{transform:rotate(-180deg) scale(.3);opacity:0}}
+.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+@media(prefers-reduced-motion:reduce){.celebration-card,.celebration-mark{animation:none}}

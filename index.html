@@ -40,6 +40,14 @@
     <main>
       <section class="game-area" aria-label="Sudoku puzzle">
         <div id="board" class="board" role="group" aria-label="Sudoku board"></div>
+        <div id="celebration" class="celebration" role="status" hidden>
+          <div class="celebration-card">
+            <p class="celebration-mark" aria-hidden="true">✦</p>
+            <h2>Solved!</h2>
+            <p id="celebration-detail"></p>
+            <div class="celebration-actions"><button id="celebration-close">Admire it</button><button class="dialog-primary" id="celebration-new">New puzzle</button></div>
+          </div>
+        </div>
       </section>
       <aside class="controls" aria-label="Game controls">
         <div class="difficulty-control"><label for="difficulty">Difficulty</label><select id="difficulty"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></div>
@@ -59,6 +67,18 @@
     <div class="setting"><label for="cell-line">Cell lines</label><output id="cell-line-value" for="cell-line"></output><input type="range" id="cell-line" min="1" max="4" step="0.5"></div>
     <div class="setting"><label for="box-line">Box lines</label><output id="box-line-value" for="box-line"></output><input type="range" id="box-line" min="2" max="8" step="1"></div>
     <div class="dialog-actions"><button id="reset-settings">Reset</button><button class="dialog-primary" id="close-settings">Done</button></div>
+  </dialog>
+  <dialog id="debug-dialog" class="settings-dialog debug-dialog" aria-labelledby="debug-title">
+    <h2 id="debug-title">Debug</h2>
+    <p>Testing shortcuts. Moves can be undone.</p>
+    <div class="debug-actions">
+      <button data-debug="all-but-one">Solve all but one square</button>
+      <button data-debug="solve">Solve puzzle</button>
+      <button data-debug="number">Finish selected number</button>
+      <button data-debug="some">Fill 10 random squares</button>
+      <button data-debug="reset">Clear my entries</button>
+    </div>
+    <div class="dialog-actions"><button class="dialog-primary" id="close-debug">Done</button></div>
   </dialog>
   <script type="module" src="./app.js"></script>
 </body>
