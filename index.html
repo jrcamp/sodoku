@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f3ec">
+  <meta name="description" content="Sudoku, online or offline.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Sudoku">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="./icons/icon-192.png">
+  <script>
+    try {
+      const theme = localStorage.getItem('sudoku-theme');
+      if (['forest', 'blue', 'lavender', 'cobalt', 'amber', 'plum'].includes(theme)) document.documentElement.dataset.theme = theme;
+    } catch { /* Use the default when storage is unavailable. */ }
+  </script>
+  <link rel="stylesheet" href="./styles.css">
+  <title>Sudoku</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="masthead">
+      <a class="brand" href="./" aria-label="Sudoku home"><span class="brand-icon" aria-hidden="true">▦</span> sudoku<span class="brand-dot">.</span></a>
+      <div class="header-actions">
+        <label class="theme-picker" for="theme"><span>Theme</span><select id="theme" aria-label="Color theme"><option value="forest">Forest</option><option value="blue">Bright blue</option><option value="lavender">Lavender</option><option value="cobalt">Bold cobalt</option><option value="amber">Amber ink</option><option value="plum">Deep plum</option></select></label>
+      </div>
+    </header>
+    <main>
+      <section class="game-area" aria-label="Sudoku puzzle">
+        <div id="board" class="board" role="group" aria-label="Sudoku board"></div>
+      </section>
+      <aside class="controls" aria-label="Game controls">
+        <div class="difficulty-control"><label for="difficulty">Difficulty</label><select id="difficulty"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></div>
+        <div class="number-pad" id="number-pad" role="group" aria-label="Choose a number"></div>
+        <div class="edit-controls"><button id="undo" disabled><span aria-hidden="true">↶</span> Undo</button><button id="erase" aria-pressed="false"><span aria-hidden="true">⌫</span> Erase</button></div>
+        <p id="save-state" class="save-warning" role="status"></p>
+        <p id="message" class="message" role="status" aria-live="polite"></p>
+        <button class="new-game" id="new-game">New puzzle <span aria-hidden="true">↗</span></button>
+      </aside>
+    </main>
+  </div>
+  <dialog id="new-dialog"><h2>New puzzle?</h2><p>This replaces your current puzzle.</p><label for="new-difficulty">Difficulty</label><select id="new-difficulty"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select><div class="dialog-actions"><button id="cancel-new">Cancel</button><button class="dialog-primary" id="confirm-new">New puzzle</button></div></dialog>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
