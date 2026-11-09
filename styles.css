@@ -148,3 +148,84 @@ dialog[open]::backdrop{animation:backdrop-in .2s ease-out}
 @keyframes mark-spin{from{transform:rotate(-180deg) scale(.3);opacity:0}}
 .confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
 @media(prefers-reduced-motion:reduce){.celebration-card,.celebration-mark{animation:none}}
+
+/* Pip the cat: lives in a lane on top of the board. */
+:root{--cat-space:0px;--cat-fur:color-mix(in srgb,var(--ink) 82%,#5d6470);--cat-eye:#e7d36a}
+:root.cat-on{--cat-space:40px}
+.game-area{padding-top:var(--cat-space)}
+.celebration{top:var(--cat-space)}
+@media(min-width:700px) and (orientation:landscape){.game-area{width:min(100%,calc(100dvh - 92px - var(--cat-space) - env(safe-area-inset-top) - env(safe-area-inset-bottom)))}}
+@media(min-width:601px) and (max-width:950px) and (orientation:portrait){.game-area{max-width:min(100%,max(440px,calc(100dvh - 340px - var(--cat-space))))}}
+.cat-lane{position:absolute;left:0;right:0;top:0;height:calc(var(--cat-space) + 2px);z-index:3;pointer-events:none}
+.cat-lane[hidden]{display:none}
+.cat{position:absolute;left:0;bottom:0;width:64px;height:45px;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cat-flip,.cat-body,.cat-svg{width:100%;height:100%;display:block}
+.cat-flip.left{transform:scaleX(-1)}
+.cat-svg{overflow:visible}
+.cat .pose{display:none}
+.cat[data-pose=stand] .pose-stand,.cat[data-pose=sit] .pose-sit,.cat[data-pose=nap] .pose-nap{display:inline}
+.cat .fur,.cat .leg{fill:var(--cat-fur)}
+.cat .tail{fill:none;stroke:var(--cat-fur);stroke-width:5.5;stroke-linecap:round}
+.cat .ear-in,.cat .nose{fill:#eba3aa}
+.cat .eye{fill:var(--cat-eye)}
+.cat .pupil{fill:#17191c}
+.cat .whisker{stroke:#ffffff;stroke-opacity:.55;stroke-width:.7;fill:none;stroke-linecap:round}
+.cat .closed-eye{stroke:#ffffff;stroke-opacity:.7;stroke-width:1.2;fill:none;stroke-linecap:round}
+.cat .collar{fill:none;stroke:#e8665a;stroke-width:2.6;stroke-linecap:round}
+.cat .bell{fill:#f2b33d}
+.cat .tail,.cat .leg,.cat .eyes,.cat .head,.cat .pose{transform-box:fill-box}
+.cat .tail{transform-origin:100% 100%;animation:cat-tail 2.6s ease-in-out infinite}
+.cat .eyes{transform-origin:center;animation:cat-blink 5.5s infinite}
+.cat .leg{transform-origin:50% 0}
+.cat.walking .leg-a{animation:cat-step .38s ease-in-out infinite alternate}
+.cat.walking .leg-b{animation:cat-step .38s ease-in-out infinite alternate-reverse}
+.cat.walking .pose-stand{animation:cat-bob .38s ease-in-out infinite alternate}
+.cat .pose{transform-origin:50% 100%}
+.cat .pose-nap{animation:cat-breathe 3.2s ease-in-out infinite}
+.cat.grooming .paw-lick{animation:cat-lick .55s ease-in-out infinite alternate}
+.cat.grooming .pose-sit .head{transform-origin:50% 100%;animation:cat-groom-head 1.1s ease-in-out infinite alternate}
+.cat.batting .paw-bat{animation:cat-bat .22s ease-out 1}
+.cat.crouch .pose-stand{transform:scaleY(.8);animation:cat-wiggle .18s ease-in-out infinite alternate}
+.cat.stretch .pose-stand{animation:cat-stretch 1.1s ease-in-out}
+.cat-body{transform-origin:50% 100%}
+.cat-body.hop{animation:cat-hop .45s ease-out}
+.cat-body.happy{animation:cat-happy .5s ease-out}
+.cat-body.startle{animation:cat-startle .6s ease-out}
+.cat-body.pounce{animation:cat-pounce .45s ease-out}
+@keyframes cat-tail{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(9deg)}}
+@keyframes cat-blink{0%,95%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+@keyframes cat-step{from{transform:rotate(-20deg)}to{transform:rotate(20deg)}}
+@keyframes cat-bob{from{transform:translateY(0)}to{transform:translateY(-1.5px)}}
+@keyframes cat-breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.02,1.07)}}
+@keyframes cat-lick{from{transform:translate(0,0) rotate(0)}to{transform:translate(-1px,-15px) rotate(-14deg)}}
+@keyframes cat-groom-head{from{transform:rotate(0)}to{transform:rotate(-8deg) translateY(1px)}}
+@keyframes cat-bat{0%{transform:rotate(0)}50%{transform:rotate(-65deg)}100%{transform:rotate(0)}}
+@keyframes cat-wiggle{from{transform:scaleY(.8) translateX(-.8px)}to{transform:scaleY(.8) translateX(.8px)}}
+@keyframes cat-stretch{0%,100%{transform:none}35%,65%{transform:scale(1.14,.82)}}
+@keyframes cat-hop{40%{transform:translateY(-16px)}}
+@keyframes cat-happy{0%{transform:none}35%{transform:translateY(-20px) rotate(-6deg)}70%{transform:translateY(0) scale(1.06,.92)}100%{transform:none}}
+@keyframes cat-startle{0%{transform:none}25%{transform:translateY(-22px) scale(1.12)}60%{transform:translateY(0) scale(1.05,.95)}100%{transform:none}}
+@keyframes cat-pounce{0%{transform:none}40%{transform:translateY(-26px) rotate(-12deg)}100%{transform:none}}
+.cat-bubble{position:absolute;left:50%;bottom:calc(100% + 2px);transform:translate(-50%,6px);background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:2px 9px;font-size:12px;font-weight:650;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 3px 10px #0000001a}
+.cat-bubble.show{opacity:1;transform:translate(-50%,0)}
+.cat-heart,.cat-z{position:absolute;bottom:55%;pointer-events:none;font-weight:700}
+.cat-heart{color:#e8665a;font-size:12px;animation:cat-float-up 1.4s ease-out both}
+.cat-z{color:var(--muted);font-size:12px;animation:cat-z-up 2.8s ease-out both}
+@keyframes cat-float-up{from{opacity:0;transform:translateY(0) scale(.6)}20%{opacity:1}to{opacity:0;transform:translateY(-38px) scale(1.1)}}
+@keyframes cat-z-up{from{opacity:0;transform:translate(0,0) scale(.7)}25%{opacity:.9}to{opacity:0;transform:translate(14px,-36px) scale(1.35)}}
+.cat-yarn{position:absolute;left:0;bottom:2px;width:15px;height:15px;border-radius:50%;background:repeating-linear-gradient(40deg,#e8665a 0 2.5px,#c94f45 2.5px 4px);box-shadow:inset -2px -2px 0 #0000001f;animation:cat-toy-in .3s ease-out}
+.cat-yarn::after{content:"";position:absolute;right:-7px;bottom:1px;width:9px;height:2px;border-radius:2px;background:#c94f45}
+.cat-butterfly{position:absolute;left:0;top:0;width:20px;height:16px;pointer-events:none;animation:cat-toy-in .4s ease-out}
+.cat-butterfly svg{width:100%;height:100%;overflow:visible;animation:cat-flutter-bob .5s ease-in-out infinite alternate}
+.cat-butterfly .wing{fill:#f2b33d;transform-box:view-box;transform-origin:10px 8px;animation:cat-flap .16s ease-in-out infinite alternate}
+.cat-butterfly .bf-body{fill:var(--ink)}
+.cat-yarn.leaving,.cat-butterfly.leaving{opacity:0;transition:opacity .4s}
+.cat-butterfly.escaping{opacity:0;transition:transform 1.3s ease-in,opacity 1.3s ease-in}
+@keyframes cat-flap{from{transform:scaleX(1)}to{transform:scaleX(.25)}}
+@keyframes cat-flutter-bob{from{transform:translateY(-2px)}to{transform:translateY(2px)}}
+@keyframes cat-toy-in{from{opacity:0}}
+.setting-toggle{grid-template-columns:1fr auto}
+.setting-toggle input{width:24px;height:24px;margin:0;accent-color:var(--accent)}
+.setting-note{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.debug-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(prefers-reduced-motion:reduce){.cat *,.cat-body,.cat-butterfly *{animation:none!important}}

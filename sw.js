@@ -1,6 +1,6 @@
 // Bump this version whenever deploying changed app assets.
-const CACHE = 'sudoku-static-v7';
-const ASSETS = ['./', './index.html', './styles.css', './app.js', './sudoku.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png'];
+const CACHE = 'sudoku-static-v8';
+const ASSETS = ['./', './index.html', './styles.css', './app.js', './sudoku.js', './cat.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
   // Wait until all old app windows close before activating a new asset version.

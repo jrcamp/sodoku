@@ -24,6 +24,8 @@
       root.setProperty('--cell-line-width', clamp(d.cellLine, 1, 4, 1) + 'px');
       root.setProperty('--box-line-width', clamp(d.boxLine, 2, 8, 3) + 'px');
     } catch { /* Use default sizes when storage is unavailable. */ }
+    try { if (localStorage.getItem('sudoku-cat') !== 'off') document.documentElement.classList.add('cat-on'); }
+    catch { document.documentElement.classList.add('cat-on'); }
   </script>
   <link rel="stylesheet" href="./styles.css">
   <title>Sudoku</title>
@@ -39,6 +41,7 @@
     </header>
     <main>
       <section class="game-area" aria-label="Sudoku puzzle">
+        <div id="cat-lane" class="cat-lane" aria-hidden="true" hidden></div>
         <div id="board" class="board" role="group" aria-label="Sudoku board"></div>
         <div id="celebration" class="celebration" role="status" hidden>
           <div class="celebration-card">
@@ -63,6 +66,7 @@
   <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
     <h2 id="settings-title">Display</h2>
     <div class="setting setting-theme"><label for="theme">Theme</label><select id="theme"><option value="forest">Forest</option><option value="blue">Bright blue</option><option value="lavender">Lavender</option><option value="cobalt">Bold cobalt</option><option value="amber">Amber ink</option><option value="plum">Deep plum</option></select></div>
+    <div class="setting setting-toggle"><label for="cat-toggle">Cat companion <span class="setting-note">Pip lives on top of the board</span></label><input type="checkbox" id="cat-toggle" role="switch"></div>
     <div class="setting"><label for="number-size">Number size</label><output id="number-size-value" for="number-size"></output><input type="range" id="number-size" min="70" max="140" step="5"></div>
     <div class="setting"><label for="cell-line">Cell lines</label><output id="cell-line-value" for="cell-line"></output><input type="range" id="cell-line" min="1" max="4" step="0.5"></div>
     <div class="setting"><label for="box-line">Box lines</label><output id="box-line-value" for="box-line"></output><input type="range" id="box-line" min="2" max="8" step="1"></div>
@@ -77,6 +81,7 @@
       <button data-debug="number">Finish selected number</button>
       <button data-debug="some">Fill 10 random squares</button>
       <button data-debug="reset">Clear my entries</button>
+      <div class="debug-row"><button data-debug="cat-nap">Cat: nap</button><button data-debug="cat-yarn">Cat: yarn</button><button data-debug="cat-butterfly">Cat: butterfly</button><button data-debug="cat-groom">Cat: groom</button></div>
     </div>
     <div class="dialog-actions"><button class="dialog-primary" id="close-debug">Done</button></div>
   </dialog>

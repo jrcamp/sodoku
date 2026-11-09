@@ -1,4 +1,5 @@
 import { createPuzzle, place, undo, validSavedGame } from './sudoku.js';
+import { createCat } from './cat.js';
 const $ = id => document.getElementById(id);
 const storageKey = 'sudoku-studio-v1';
 const themeColors = { forest: '#f5f3ec', blue: '#edf6ff', lavender: '#f5f0fc', cobalt: '#e4edff', amber: '#fff3d4', plum: '#f4e5f3' };
@@ -45,6 +46,18 @@ $('open-settings').addEventListener('click', () => $('settings-dialog').showModa
 $('close-settings').addEventListener('click', () => $('settings-dialog').close());
 $('reset-settings').addEventListener('click', () => { display = cleanDisplay(); applyDisplay(); saveDisplay(); });
 $('settings-dialog').addEventListener('click', event => { if (event.target === event.currentTarget) event.currentTarget.close(); });
+// Pip the cat lives on the top edge of the board and can be turned off in Settings.
+const cat = createCat({ lane: $('cat-lane') });
+function setCat(on) {
+  document.documentElement.classList.toggle('cat-on', on);
+  $('cat-toggle').checked = on;
+  cat.setEnabled(on);
+}
+setCat(document.documentElement.classList.contains('cat-on'));
+$('cat-toggle').addEventListener('change', event => {
+  setCat(event.target.checked);
+  try { localStorage.setItem('sudoku-cat', event.target.checked ? 'on' : 'off'); } catch { /* Applies for this visit. */ }
+});
 let selected = 1, game;
 try { const saved = JSON.parse(localStorage.getItem(storageKey)); if (validSavedGame(saved)) game = saved; } catch { /* Storage may be unavailable or corrupt. */ }
 game ||= createPuzzle('easy');
@@ -120,16 +133,18 @@ function play(index) {
     cells[index].classList.add('wrong');
     $('board').classList.add('mistake');
     say(`${selected} is incorrect.`, 'error');
+    cat.react('wrong', { col: index % 9 });
     flashTimer = setTimeout(() => { cells[index].classList.remove('wrong'); $('board').classList.remove('mistake'); }, 700);
   } else if (result === 'fixed') say('Starting clues cannot be changed.');
   else if (result === 'changed') {
     say('');
     save(); render({ pop: true });
     if (isComplete()) celebrate();
+    else cat.react('placed', { col: index % 9 });
   }
 }
 $('erase').addEventListener('click', () => select(selected === 0 ? 1 : 0));
-$('undo').addEventListener('click', () => { if (undo(game)) { hideCelebration(); save(); say(''); render({ pop: true }); } });
+$('undo').addEventListener('click', () => { if (undo(game)) { hideCelebration(); save(); say(''); render({ pop: true }); cat.react('undo'); } });
 function showNew(level = game.difficulty) { $('new-difficulty').value = level; $('new-dialog').showModal(); }
 $('new-game').addEventListener('click', () => showNew());
 $('difficulty').addEventListener('change', event => { const level = event.target.value; event.target.value = game.difficulty; showNew(level); });
@@ -138,7 +153,7 @@ $('confirm-new').addEventListener('click', async () => {
   const button = $('confirm-new');
   button.disabled = true; button.textContent = 'Creating…';
   await new Promise(resolve => setTimeout(resolve, 30));
-  game = createPuzzle($('new-difficulty').value); selected = 1; hideCelebration();
+  game = createPuzzle($('new-difficulty').value); selected = 1; hideCelebration(); cat.react('newGame');
   save(); say(''); render(); replay($('board'), 'fresh', 900);
   button.disabled = false; button.textContent = 'New puzzle'; $('new-dialog').close();
 });
@@ -156,6 +171,7 @@ function hideCelebration() {
   $('celebration').hidden = true;
 }
 function celebrate() {
+  cat.react('complete');
   hideCelebration();
   const level = game.difficulty[0].toUpperCase() + game.difficulty.slice(1);
   $('celebration-detail').textContent = `${level} puzzle complete.`;
@@ -230,6 +246,7 @@ $('debug-dialog').addEventListener('click', event => {
   if (action === 'solve') debugFill(empty);
   if (action === 'number') debugFill(empty.filter(i => game.solution[i] === (selected || 1)));
   if (action === 'some') debugFill(empty.sort(() => Math.random() - .5).slice(0, 10));
+  if (action.startsWith('cat-')) cat.perform(action.slice(4));
   if (action === 'reset') { hideCelebration(); game.values = [...game.givens]; game.history = []; save(); say(''); render(); replay($('board'), 'fresh', 900); }
 });
 $('close-debug').addEventListener('click', () => $('debug-dialog').close());
