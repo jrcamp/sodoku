@@ -127,10 +127,6 @@ dialog[open]::backdrop{animation:backdrop-in .2s ease-out}
   .number-key:active,.edit-controls button:active,.new-game:active,.settings-button:active{transform:none}
 }
 
-.debug-dialog p{margin:0 0 14px;font-size:13px}
-.debug-actions{display:grid;gap:8px;margin-bottom:18px}
-.debug-actions button{min-height:44px;border:1px solid var(--line);border-radius:8px;background:var(--key);text-align:left;padding:0 14px;font-size:13px}
-.debug-dialog .dialog-actions .dialog-primary{background:var(--green);color:#fff;padding:14px 20px;border-radius:8px}
 
 /* Celebration */
 .game-area{position:relative}
@@ -151,14 +147,14 @@ dialog[open]::backdrop{animation:backdrop-in .2s ease-out}
 
 /* Pip the cat: lives in a lane on top of the board. */
 :root{--cat-space:0px;--cat-fur:color-mix(in srgb,var(--ink) 82%,#5d6470);--cat-eye:#e7d36a}
-:root.cat-on{--cat-space:40px}
+:root.cat-on{--cat-space:48px}
 .game-area{padding-top:var(--cat-space)}
 .celebration{top:var(--cat-space)}
 @media(min-width:700px) and (orientation:landscape){.game-area{width:min(100%,calc(100dvh - 92px - var(--cat-space) - env(safe-area-inset-top) - env(safe-area-inset-bottom)))}}
 @media(min-width:601px) and (max-width:950px) and (orientation:portrait){.game-area{max-width:min(100%,max(440px,calc(100dvh - 340px - var(--cat-space))))}}
 .cat-lane{position:absolute;left:0;right:0;top:0;height:calc(var(--cat-space) + 2px);z-index:3;pointer-events:none}
 .cat-lane[hidden]{display:none}
-.cat{position:absolute;left:0;bottom:0;width:64px;height:45px;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cat{position:absolute;left:0;bottom:0;width:77px;height:54px;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .cat-flip,.cat-body,.cat-svg{width:100%;height:100%;display:block}
 .cat-flip.left{transform:scaleX(-1)}
 .cat-svg{overflow:visible}
@@ -182,7 +178,8 @@ dialog[open]::backdrop{animation:backdrop-in .2s ease-out}
 .cat.walking .pose-stand{animation:cat-bob .38s ease-in-out infinite alternate}
 .cat .pose{transform-origin:50% 100%}
 .cat .pose-nap{animation:cat-breathe 3.2s ease-in-out infinite}
-.cat.grooming .paw-lick{animation:cat-lick .55s ease-in-out infinite alternate}
+.cat .paw-lick{transform-box:fill-box;transform-origin:50% 100%}
+.cat.grooming .paw-lick{animation:cat-lick .5s ease-in-out infinite alternate}
 .cat.grooming .pose-sit .head{transform-origin:50% 100%;animation:cat-groom-head 1.1s ease-in-out infinite alternate}
 .cat.batting .paw-bat{animation:cat-bat .22s ease-out 1}
 .cat.crouch .pose-stand{transform:scaleY(.8);animation:cat-wiggle .18s ease-in-out infinite alternate}
@@ -197,8 +194,8 @@ dialog[open]::backdrop{animation:backdrop-in .2s ease-out}
 @keyframes cat-step{from{transform:rotate(-20deg)}to{transform:rotate(20deg)}}
 @keyframes cat-bob{from{transform:translateY(0)}to{transform:translateY(-1.5px)}}
 @keyframes cat-breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.02,1.07)}}
-@keyframes cat-lick{from{transform:translate(0,0) rotate(0)}to{transform:translate(-1px,-15px) rotate(-14deg)}}
-@keyframes cat-groom-head{from{transform:rotate(0)}to{transform:rotate(-8deg) translateY(1px)}}
+@keyframes cat-lick{0%{transform:translate(0,-13px) rotate(-8deg)}100%{transform:translate(-3px,-24px) rotate(-18deg)}}
+@keyframes cat-groom-head{from{transform:rotate(4deg) translateY(1px)}to{transform:rotate(-6deg) translateY(2px)}}
 @keyframes cat-bat{0%{transform:rotate(0)}50%{transform:rotate(-65deg)}100%{transform:rotate(0)}}
 @keyframes cat-wiggle{from{transform:scaleY(.8) translateX(-.8px)}to{transform:scaleY(.8) translateX(.8px)}}
 @keyframes cat-stretch{0%,100%{transform:none}35%,65%{transform:scale(1.14,.82)}}
@@ -227,5 +224,57 @@ dialog[open]::backdrop{animation:backdrop-in .2s ease-out}
 .setting-toggle{grid-template-columns:1fr auto}
 .setting-toggle input{width:24px;height:24px;margin:0;accent-color:var(--accent)}
 .setting-note{display:block;font-size:11px;color:var(--muted);margin-top:2px}
-.debug-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(prefers-reduced-motion:reduce){.cat *,.cat-body,.cat-butterfly *{animation:none!important}}
+
+/* Falling yarn can leave the board without making the page scroll. */
+.app-shell{overflow:clip}
+
+/* Floating debug panel: non-blocking, draggable, collapsible. Starts in the
+   bottom-right corner, which is empty space under the controls on iPad and phone. */
+.debug-panel{position:fixed;bottom:max(10px,env(safe-area-inset-bottom));right:max(16px,env(safe-area-inset-right));z-index:60;width:300px;max-width:calc(100vw - 20px);background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 36px #14291d29;font-size:12px;animation:dialog-in .2s ease-out}
+.debug-panel[hidden]{display:none}
+.debug-header{display:flex;align-items:center;gap:6px;padding:2px 2px 2px 10px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.debug-header:active{cursor:grabbing}
+.debug-header strong{flex:1;font-size:12px}
+.debug-grip{color:var(--muted);font-size:13px}
+.debug-header button{width:34px;height:32px;border:0;background:transparent;border-radius:8px;font-size:18px;line-height:1;color:var(--muted)}
+.debug-panel.collapsed{width:auto}
+.debug-panel.collapsed .debug-body{display:none}
+.debug-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:0 8px 8px}
+.debug-grid button{min-height:30px;border:1px solid var(--line);border-radius:7px;background:var(--key);font-size:11.5px;padding:0 3px;white-space:nowrap}
+.debug-grid .debug-cat{background:color-mix(in srgb,#e8665a 13%,var(--paper));border-color:color-mix(in srgb,#e8665a 35%,var(--line))}
+@media(prefers-reduced-motion:reduce){.debug-panel{animation:none}}
+/* iPad portrait and short landscape screens have no empty corner, so dock a wide, short strip in the header
+   between the logo and Settings instead. */
+@media(min-width:601px) and (orientation:portrait),(orientation:landscape) and (max-height:800px){
+  .debug-panel{top:max(8px,env(safe-area-inset-top));bottom:auto;right:auto;left:50%;translate:-45% 0;width:auto;display:flex;align-items:stretch}
+  .debug-header{flex-direction:column;align-items:flex-start;justify-content:center;gap:0;padding:4px 0 4px 10px}
+  .debug-header strong{flex:0}
+  .debug-header button{width:30px;height:24px;font-size:16px}
+  .debug-grip{display:none}
+  .debug-grid{grid-template-columns:repeat(6,auto);padding:6px 8px 6px 6px}
+  .debug-grid button{min-height:28px;padding:0 7px}
+}
+.cat .paw-tip{fill:color-mix(in srgb,var(--cat-fur) 55%,#ffffff)}
+.cat .tongue{fill:#e57b88;opacity:0;transform-box:fill-box;transform-origin:50% 0}
+.cat.grooming .pose-sit .tongue{animation:cat-tongue .5s ease-in-out infinite alternate}
+.cat.grooming .pose-sit .eyes{animation:none;transform:scaleY(.12)}
+@keyframes cat-tongue{0%{opacity:1;transform:scaleY(1)}55%,100%{opacity:0;transform:scaleY(.3)}}
+
+/* Pip: yawn and kneading. */
+.cat .yawn{transform-box:fill-box;transform-origin:50% 0;transform:scaleY(0)}
+.cat .yawn-mouth{fill:#4a1d27}
+.cat .yawn-tongue{fill:#e57b88}
+.cat.yawning .pose-sit .yawn{animation:cat-yawn 1.8s ease-in-out}
+.cat.yawning .pose-sit .eyes{animation:cat-yawn-eyes 1.8s ease-in-out}
+.cat.yawning .pose-sit .head{transform-origin:50% 100%;animation:cat-yawn-head 1.8s ease-in-out}
+@keyframes cat-yawn{0%{transform:scaleY(0)}30%,65%{transform:scaleY(1)}100%{transform:scaleY(0)}}
+@keyframes cat-yawn-eyes{0%,100%{transform:scaleY(1)}22%,72%{transform:scaleY(.1)}}
+@keyframes cat-yawn-head{0%,100%{transform:none}35%,65%{transform:translateY(-1.5px) rotate(-5deg)}}
+.cat.kneading .knead-1{animation:cat-knead .45s ease-in-out infinite alternate}
+.cat.kneading .knead-2{animation:cat-knead .45s ease-in-out infinite alternate-reverse}
+.cat.kneading .pose-stand{animation:cat-bob .45s ease-in-out infinite alternate}
+.cat.kneading .pose-stand .eyes{animation:none;transform:scaleY(.3)}
+.cat.kneading .pose-stand .head{transform-origin:0% 100%;animation:cat-knead-head .9s ease-in-out infinite alternate}
+@keyframes cat-knead{from{transform:translateY(0)}to{transform:translateY(-5px)}}
+@keyframes cat-knead-head{from{transform:rotate(3deg)}to{transform:rotate(6deg)}}

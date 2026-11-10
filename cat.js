@@ -13,8 +13,8 @@ const SVG = `
     <path class="tail" d="M21 35 C9 32 6 21 12 11"/>
     <rect class="leg leg-a" x="22" y="40" width="5.5" height="15.5" rx="2.75"/>
     <rect class="leg leg-b" x="30" y="40" width="5.5" height="15.5" rx="2.75"/>
-    <rect class="leg leg-b" x="46" y="40" width="5.5" height="15.5" rx="2.75"/>
-    <rect class="leg leg-a paw-bat" x="54" y="40" width="5.5" height="15.5" rx="2.75"/>
+    <rect class="leg leg-b knead-1" x="46" y="40" width="5.5" height="15.5" rx="2.75"/>
+    <rect class="leg leg-a paw-bat knead-2" x="54" y="40" width="5.5" height="15.5" rx="2.75"/>
     <ellipse class="fur" cx="39" cy="38" rx="22" ry="11"/>
     <g class="head">
       ${FUR_HEAD(63, 25, 12, '52,21 54,6 63,14', '64,14 73,6 74,21')}
@@ -32,17 +32,21 @@ const SVG = `
     <path class="tail" d="M31 54 C17 57 9 50 15 41"/>
     <ellipse class="fur" cx="38" cy="42" rx="14.5" ry="13"/>
     <rect class="leg" x="31" y="41" width="6" height="14.5" rx="3"/>
-    <rect class="leg paw-lick" x="40" y="41" width="6" height="14.5" rx="3"/>
+    <ellipse class="paw-tip" cx="34" cy="54.3" rx="3.4" ry="1.9"/>
     <g class="head">
       ${FUR_HEAD(38.5, 21, 12.5, '27,17 28.5,1.5 37.5,10', '39.5,10 48.5,1.5 50,17')}
       <polygon class="ear-in" points="30,12 31,5.5 35,10"/>
       <polygon class="ear-in" points="42,10 46,5.5 47,12"/>
       <g class="eyes"><ellipse class="eye" cx="33.8" cy="20.5" rx="2.6" ry="3.2"/><ellipse class="eye" cx="43.2" cy="20.5" rx="2.6" ry="3.2"/><ellipse class="pupil" cx="33.8" cy="20.8" rx="1" ry="2.4"/><ellipse class="pupil" cx="43.2" cy="20.8" rx="1" ry="2.4"/></g>
+      <g class="yawn"><ellipse class="yawn-mouth" cx="38.5" cy="30.6" rx="3.1" ry="3.5"/><ellipse class="yawn-tongue" cx="38.5" cy="32.9" rx="2" ry="1.2"/></g>
       <path class="nose" d="M37 25.6h3l-1.5 1.8z"/>
+      <ellipse class="tongue" cx="38.5" cy="29.4" rx="1.5" ry="1.8"/>
       <path class="whisker" d="M31 26.5l-9-1.5M31 28.5l-9 1.5M46 26.5l9-1.5M46 28.5l9 1.5"/>
     </g>
     <path class="collar" d="M31 31.5q7.5 4.5 15 0"/>
     <circle class="bell" cx="38.5" cy="35" r="2.1"/>
+    <!-- Drawn after the head so the paw shows in front of the face while grooming. -->
+    <g class="paw-lick"><rect class="leg" x="40" y="41" width="6" height="14.5" rx="3"/><ellipse class="paw-tip" cx="43" cy="54.3" rx="3.4" ry="1.9"/></g>
   </g>
 
   <g class="pose pose-nap">
@@ -61,7 +65,7 @@ const BUTTERFLY = `<svg viewBox="0 0 20 16" aria-hidden="true"><g class="wing wi
 const rand = (a, b) => a + Math.random() * (b - a);
 const ABORT = Symbol('abort');
 
-export function createCat({ lane }) {
+export function createCat({ lane, board }) {
   lane.innerHTML = `<div class="cat" data-pose="sit"><div class="cat-bubble"></div><div class="cat-flip"><div class="cat-body">${SVG}</div></div></div>`;
   const cat = lane.querySelector('.cat');
   const flip = lane.querySelector('.cat-flip');
@@ -93,7 +97,7 @@ export function createCat({ lane }) {
 
   function setPose(pose) { cat.dataset.pose = pose; }
   function setMode(...modes) {
-    cat.classList.remove('walking', 'grooming', 'batting', 'crouch', 'stretch');
+    cat.classList.remove('walking', 'grooming', 'batting', 'crouch', 'stretch', 'kneading', 'yawning');
     cat.classList.add(...modes);
   }
   function face(dir) { if (dir) { facing = dir; flip.classList.toggle('left', dir < 0); } }
@@ -143,7 +147,8 @@ export function createCat({ lane }) {
   function addToy(el) { toys.add(el); lane.append(el); return el; }
   function removeToy(el) {
     if (!toys.delete(el)) return;
-    el.classList.add('leaving');
+    el.style.transition = `${el.style.transition ? el.style.transition + ', ' : ''}opacity .4s`;
+    el.style.opacity = '0';
     setTimeout(() => el.remove(), 450);
   }
   function clearToys() { for (const toy of [...toys]) removeToy(toy); }
@@ -185,13 +190,15 @@ export function createCat({ lane }) {
       await wait(800, tok);
     },
     async nap(tok) {
+      await behaviors.yawn(tok, true);
       setPose('nap'); setMode(); napping = true; startZs();
       try { await wait(rand(25000, 50000), tok); }
       finally { stopZs(); }
       await wakeUp(tok);
       await wait(1200, tok);
     },
-    async yarn(tok) {
+    async yarn(tok, forceKnock = false) {
+      const knock = forceKnock || Math.random() < .35;
       const ball = addToy(Object.assign(document.createElement('div'), { className: 'cat-yarn' }));
       const ballSize = 15;
       let bx = clampBall(rand(0, lane.clientWidth));
@@ -202,13 +209,33 @@ export function createCat({ lane }) {
         await wait(500, tok);
         const rounds = Math.round(rand(2, 4));
         for (let i = 0; i < rounds; i++) {
-          const side = bx + ballSize / 2 > x + catWidth() / 2 ? 1 : -1;
+          const last = i === rounds - 1;
+          let side = bx + ballSize / 2 > x + catWidth() / 2 ? 1 : -1;
+          // To knock it off, bat it toward the nearer end of the ledge.
+          if (last && knock) side = bx + ballSize / 2 > lane.clientWidth / 2 ? 1 : -1;
           // Stop with the nose just touching the ball.
           await walkTo(side > 0 ? bx - catWidth() * .86 : bx + ballSize - catWidth() * .14, tok, 75);
           face(side); setPose('stand'); setMode('crouch');
           await wait(rand(500, 1300), tok);
           setMode('batting');
           await wait(220, tok);
+          if (last && knock) {
+            const edge = side > 0 ? lane.clientWidth + 6 : -ballSize - 6;
+            const fall = (board?.offsetHeight ?? 300) + 60;
+            ball.style.transition = 'transform 650ms cubic-bezier(.2,.6,.4,1)';
+            ball.style.transform = `translateX(${edge}px) rotate(${edge * 5}deg)`;
+            ball.animate([{ translate: '0 0', opacity: 1 }, { translate: `${side * 14}px ${fall}px`, opacity: 0 }],
+              { duration: 800, delay: 560, easing: 'cubic-bezier(.55,0,1,.6)', fill: 'forwards' });
+            await wait(300, tok);
+            setMode();
+            await walkTo(side > 0 ? maxX() : 0, tok, 70);
+            face(side); setMode('crouch');
+            await wait(1400, tok);
+            setMode(); setPose('sit');
+            say(['…', 'oops.', 'mrrp.'][Math.floor(Math.random() * 3)], 2000);
+            await wait(2400, tok);
+            return;
+          }
           let next = bx + side * rand(70, 170);
           if (next < 0 || next > lane.clientWidth - ballSize) next = bx - side * rand(70, 150);
           rollTo(next, 900);
@@ -220,6 +247,22 @@ export function createCat({ lane }) {
         setPose('sit');
         await wait(1500, tok);
       } finally { removeToy(ball); }
+    },
+    async yawn(tok, quick = false) {
+      setPose('sit'); setMode('yawning');
+      await wait(1850, tok);
+      setMode();
+      await wait(quick ? 300 : rand(1200, 2500), tok);
+    },
+    // Kneading the ledge ("making biscuits"); often ends in a nap.
+    async knead(tok) {
+      setPose('stand'); setMode('kneading');
+      if (Math.random() < .6) say('prrr', 2000);
+      await wait(rand(3000, 5000), tok);
+      setMode();
+      if (Math.random() < .55) return behaviors.nap(tok);
+      setPose('sit');
+      await wait(rand(1500, 3000), tok);
     },
     async butterfly(tok) {
       const bf = addToy(Object.assign(document.createElement('div'), { className: 'cat-butterfly', innerHTML: BUTTERFLY }));
@@ -241,7 +284,8 @@ export function createCat({ lane }) {
         setMode(); bodyMove('pounce');
         moveTo(x + facing * 34, 380, 'ease-out');
         flyTo(bx + facing * rand(40, 120), -150, 1300);
-        bf.classList.add('escaping');
+        bf.style.transition += ', opacity 1.3s ease-in';
+        bf.style.opacity = '0';
         await wait(700, tok);
         say(Math.random() < .5 ? '?!' : 'mew…');
         setPose('sit');
@@ -255,7 +299,7 @@ export function createCat({ lane }) {
     const sleepy = idle > 45000;
     const options = reduce.matches
       ? [['sit', 3], ['groom', 1], ['nap', sleepy ? 4 : 1]]
-      : [['wander', 4], ['sit', 3], ['groom', 1.5], ['yarn', 1.2], ['butterfly', .9], ['nap', sleepy ? 7 : .5]];
+      : [['wander', 4], ['sit', 3], ['groom', 1.5], ['yarn', 1.2], ['butterfly', .9], ['knead', .8], ['yawn', .8], ['nap', sleepy ? 7 : .3]];
     let roll = Math.random() * options.reduce((sum, [, w]) => sum + w, 0);
     for (const [name, weight] of options) if ((roll -= weight) <= 0) return behaviors[name];
     return behaviors.sit;
@@ -356,7 +400,9 @@ export function createCat({ lane }) {
     },
     // Debug: force a behavior now.
     perform(name) {
-      if (!enabled || !behaviors[name]) return;
+      if (!enabled) return;
+      if (name === 'knock') return interrupt(tok => behaviors.yarn(tok, true));
+      if (!behaviors[name]) return;
       interrupt(tok => behaviors[name](tok));
     }
   };

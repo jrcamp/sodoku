@@ -8,7 +8,7 @@ Use the header’s **Theme** picker for Forest, Bright blue, or Lavender, plus h
 
 **Settings** (next to Theme) adjusts number size (70–140%), cell line thickness, and 3×3 box line thickness. Changes preview live on the board and are saved on this device.
 
-**Pip the cat** lives on top of the board: it wanders, grooms, naps (more when you're idle), bats a ball of yarn, and stalks butterflies. It reacts to wrong moves, sometimes comes to look at the square you just filled, and celebrates when you finish. Tap it to purr or wake it. Turn it off with **Cat companion** in Settings.
+**Pip the cat** lives on top of the board: it wanders, grooms, naps (more when you're idle), bats a ball of yarn (occasionally right off the edge), stalks butterflies, makes biscuits, and yawns before naps. It reacts to wrong moves, sometimes comes to look at the square you just filled, and celebrates when you finish. Tap it to purr or wake it. Turn it off with **Cat companion** in Settings.
 
 - Choose a number, then tap a square to place it. **Every instance of the selected number lights up**, including starting clues and your entries.
 - An incorrect number flashes the square and board border red and announces an error. The incorrect entry is not kept.

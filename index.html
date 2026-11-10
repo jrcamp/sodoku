@@ -72,19 +72,27 @@
     <div class="setting"><label for="box-line">Box lines</label><output id="box-line-value" for="box-line"></output><input type="range" id="box-line" min="2" max="8" step="1"></div>
     <div class="dialog-actions"><button id="reset-settings">Reset</button><button class="dialog-primary" id="close-settings">Done</button></div>
   </dialog>
-  <dialog id="debug-dialog" class="settings-dialog debug-dialog" aria-labelledby="debug-title">
-    <h2 id="debug-title">Debug</h2>
-    <p>Testing shortcuts. Moves can be undone.</p>
-    <div class="debug-actions">
-      <button data-debug="all-but-one">Solve all but one square</button>
-      <button data-debug="solve">Solve puzzle</button>
-      <button data-debug="number">Finish selected number</button>
-      <button data-debug="some">Fill 10 random squares</button>
-      <button data-debug="reset">Clear my entries</button>
-      <div class="debug-row"><button data-debug="cat-nap">Cat: nap</button><button data-debug="cat-yarn">Cat: yarn</button><button data-debug="cat-butterfly">Cat: butterfly</button><button data-debug="cat-groom">Cat: groom</button></div>
+  <section id="debug-panel" class="debug-panel" aria-label="Debug tools" hidden>
+    <header class="debug-header" id="debug-handle">
+      <span class="debug-grip" aria-hidden="true">⠿</span><strong>Debug</strong>
+      <button id="debug-collapse" aria-label="Minimize debug tools" aria-expanded="true">–</button>
+      <button id="debug-close" aria-label="Close debug tools">×</button>
+    </header>
+    <div class="debug-body debug-grid">
+      <button data-debug="all-but-one" title="Solve all but one square">All but 1</button>
+      <button data-debug="solve" title="Solve the puzzle">Solve</button>
+      <button data-debug="number" title="Finish the selected number">Finish #</button>
+      <button data-debug="some" title="Fill 10 random squares">Fill 10</button>
+      <button data-debug="reset" title="Clear my entries">Clear</button>
+      <button class="debug-cat" data-debug="cat-nap" title="Pip: nap">Nap</button>
+      <button class="debug-cat" data-debug="cat-groom" title="Pip: groom">Groom</button>
+      <button class="debug-cat" data-debug="cat-yarn" title="Pip: play with yarn">Yarn</button>
+      <button class="debug-cat" data-debug="cat-knock" title="Pip: knock the yarn off">Knock off</button>
+      <button class="debug-cat" data-debug="cat-butterfly" title="Pip: butterfly">Butterfly</button>
+      <button class="debug-cat" data-debug="cat-knead" title="Pip: make biscuits">Biscuits</button>
+      <button class="debug-cat" data-debug="cat-yawn" title="Pip: yawn">Yawn</button>
     </div>
-    <div class="dialog-actions"><button class="dialog-primary" id="close-debug">Done</button></div>
-  </dialog>
+  </section>
   <script type="module" src="./app.js"></script>
 </body>
 </html>

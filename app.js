@@ -47,7 +47,7 @@ $('close-settings').addEventListener('click', () => $('settings-dialog').close()
 $('reset-settings').addEventListener('click', () => { display = cleanDisplay(); applyDisplay(); saveDisplay(); });
 $('settings-dialog').addEventListener('click', event => { if (event.target === event.currentTarget) event.currentTarget.close(); });
 // Pip the cat lives on the top edge of the board and can be turned off in Settings.
-const cat = createCat({ lane: $('cat-lane') });
+const cat = createCat({ lane: $('cat-lane'), board: $('board') });
 function setCat(on) {
   document.documentElement.classList.toggle('cat-on', on);
   $('cat-toggle').checked = on;
@@ -222,12 +222,38 @@ $('celebration-close').addEventListener('click', hideCelebration);
 $('celebration-new').addEventListener('click', () => { hideCelebration(); showNew(); });
 
 // Hidden debug panel: tap the ▦ logo five times quickly, or open the app with #debug.
+// It floats above the page without blocking it, stays open while you play,
+// can be dragged by its header or minimized, and remembers its state.
+const debugKey = 'sudoku-debug';
+let debugState = { open: false, collapsed: false, left: null, top: null };
+try { debugState = { ...debugState, ...JSON.parse(localStorage.getItem(debugKey)) }; } catch { /* Use defaults. */ }
+function saveDebug() { try { localStorage.setItem(debugKey, JSON.stringify(debugState)); } catch { /* Not essential. */ } }
+function placeDebug() {
+  const panel = $('debug-panel');
+  if (debugState.left === null) { panel.style.left = panel.style.top = panel.style.right = panel.style.bottom = panel.style.translate = ''; return; }
+  const maxLeft = innerWidth - panel.offsetWidth - 4, maxTop = innerHeight - panel.offsetHeight - 4;
+  panel.style.left = `${Math.max(4, Math.min(maxLeft, debugState.left))}px`;
+  panel.style.top = `${Math.max(4, Math.min(maxTop, debugState.top))}px`;
+  panel.style.right = panel.style.bottom = 'auto';
+  panel.style.translate = 'none';
+}
+function showDebug(open = debugState.open) {
+  debugState.open = open;
+  const panel = $('debug-panel');
+  panel.hidden = !open;
+  panel.classList.toggle('collapsed', debugState.collapsed);
+  $('debug-collapse').textContent = debugState.collapsed ? '+' : '–';
+  $('debug-collapse').setAttribute('aria-expanded', String(!debugState.collapsed));
+  $('debug-collapse').setAttribute('aria-label', debugState.collapsed ? 'Expand debug tools' : 'Minimize debug tools');
+  if (open) placeDebug();
+  saveDebug();
+}
 let logoTaps = [];
 document.querySelector('.brand-icon').addEventListener('click', event => {
   event.preventDefault();
   const now = Date.now();
   logoTaps = [...logoTaps.filter(t => now - t < 1500), now];
-  if (logoTaps.length >= 5) { logoTaps = []; $('debug-dialog').showModal(); }
+  if (logoTaps.length >= 5) { logoTaps = []; showDebug(!debugState.open); }
 });
 function debugFill(indices) {
   let changed = false;
@@ -236,12 +262,10 @@ function debugFill(indices) {
   save(); say(''); render({ pop: true });
   if (isComplete()) celebrate();
 }
-$('debug-dialog').addEventListener('click', event => {
-  if (event.target === event.currentTarget) return event.currentTarget.close();
+$('debug-panel').addEventListener('click', event => {
   const action = event.target.closest('[data-debug]')?.dataset.debug;
   if (!action) return;
   const empty = game.values.flatMap((n, i) => n ? [] : [i]);
-  $('debug-dialog').close();
   if (action === 'all-but-one') debugFill(empty.slice(0, -1));
   if (action === 'solve') debugFill(empty);
   if (action === 'number') debugFill(empty.filter(i => game.solution[i] === (selected || 1)));
@@ -249,9 +273,24 @@ $('debug-dialog').addEventListener('click', event => {
   if (action.startsWith('cat-')) cat.perform(action.slice(4));
   if (action === 'reset') { hideCelebration(); game.values = [...game.givens]; game.history = []; save(); say(''); render(); replay($('board'), 'fresh', 900); }
 });
-$('close-debug').addEventListener('click', () => $('debug-dialog').close());
-function debugFromHash() { if (location.hash === '#debug' && !$('debug-dialog').open) $('debug-dialog').showModal(); }
+$('debug-close').addEventListener('click', () => showDebug(false));
+$('debug-collapse').addEventListener('click', () => { debugState.collapsed = !debugState.collapsed; showDebug(true); });
+// Drag by the header.
+$('debug-handle').addEventListener('pointerdown', event => {
+  if (event.target.closest('button')) return;
+  const panel = $('debug-panel'), rect = panel.getBoundingClientRect();
+  const dx = event.clientX - rect.left, dy = event.clientY - rect.top;
+  $('debug-handle').setPointerCapture(event.pointerId);
+  const move = e => { debugState.left = e.clientX - dx; debugState.top = e.clientY - dy; placeDebug(); };
+  const end = () => { $('debug-handle').removeEventListener('pointermove', move); saveDebug(); };
+  $('debug-handle').addEventListener('pointermove', move);
+  $('debug-handle').addEventListener('pointerup', end, { once: true });
+  $('debug-handle').addEventListener('pointercancel', end, { once: true });
+});
+addEventListener('resize', () => { if (debugState.open) placeDebug(); });
+function debugFromHash() { if (location.hash === '#debug') showDebug(true); }
 addEventListener('hashchange', debugFromHash);
+showDebug();
 debugFromHash();
 save(); render();
 if ('serviceWorker' in navigator) {
