@@ -62,11 +62,14 @@ const SVG = `
 
 const BUTTERFLY = `<svg viewBox="0 0 20 16" aria-hidden="true"><g class="wing wing-l"><path d="M10 8C7 1 1 0 1.5 5S7 9 10 8z"/><path d="M10 8C6 9 3 13 5.5 14.5S9.5 11 10 8z"/></g><g class="wing wing-r"><path d="M10 8C13 1 19 0 18.5 5S13 9 10 8z"/><path d="M10 8C14 9 17 13 14.5 14.5S10.5 11 10 8z"/></g><rect x="9.3" y="5" width="1.4" height="7" rx=".7" class="bf-body"/></svg>`;
 
+// Pip's bed: a folded blanket in the theme's colors. Pip steps up onto it.
+const BED_BACK = `<svg viewBox="0 0 84 12" aria-hidden="true"><rect class="blanket-under" x="1.5" y="3.2" width="81" height="8.8" rx="3.6"/><path class="blanket-top" d="M3 2.6C9 1.2 15 3.2 22 2.2C29 1.2 35 3 42 2C50 .9 57 2.9 64 1.9C70 1.1 76 2.6 81 1.8V8.2C81 9.6 80 10.2 78.5 10.2H5.5C4 10.2 3 9.6 3 8.2Z"/><path class="blanket-stripe" d="M3.5 5.2C20 6.2 64 4.6 80.5 5.2M3.5 7.4C20 8.3 64 6.8 80.5 7.4"/><path class="blanket-fold" d="M81 1.8C82.6 3.4 82.8 8.6 81 10.2"/><path class="blanket-fringe" d="M1.6 4.6H.2M1.6 6.6H0M1.6 8.6H.2M1.6 10.6H.4"/></svg>`;
+
 const rand = (a, b) => a + Math.random() * (b - a);
 const ABORT = Symbol('abort');
 
 export function createCat({ lane, board }) {
-  lane.innerHTML = `<div class="cat" data-pose="sit"><div class="cat-bubble"></div><div class="cat-flip"><div class="cat-body">${SVG}</div></div></div>`;
+  lane.innerHTML = `<div class="cat-bed cat-bed-back">${BED_BACK}</div><div class="cat" data-pose="sit"><div class="cat-bubble"></div><div class="cat-flip"><div class="cat-body">${SVG}</div></div></div>`;
   const cat = lane.querySelector('.cat');
   const flip = lane.querySelector('.cat-flip');
   const body = lane.querySelector('.cat-body');
@@ -74,12 +77,19 @@ export function createCat({ lane, board }) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const pending = new Set();
   const toys = new Set();
+  // Pip's bed sits at the left end of the ledge. Outside of bed time, Pip
+  // and its toys keep clear of it.
+  const BED_W = 84;
+  let bedActive = false;
   let x = 0, facing = 1, token = 0, enabled = false, running = false, napping = false;
   let reaction = null, lastActivity = Date.now(), napTimer;
 
   const catWidth = () => cat.offsetWidth || 64;
   const maxX = () => Math.max(0, lane.clientWidth - catWidth());
-  const clampX = value => Math.min(maxX(), Math.max(0, value));
+  const minX = () => bedActive ? 0 : Math.min(BED_W + 4, maxX());
+  const clampX = value => Math.min(maxX(), Math.max(minX(), value));
+  const bedX = () => Math.max(0, (BED_W - catWidth()) / 2);
+  const inBed = () => cat.classList.contains('in-bed');
 
   // A wait that is cancelled the moment anything interrupts the cat.
   function wait(ms, tok) {
@@ -102,13 +112,16 @@ export function createCat({ lane, board }) {
   }
   function face(dir) { if (dir) { facing = dir; flip.classList.toggle('left', dir < 0); } }
   function moveTo(target, ms = 0, easing = 'linear') {
+    leftBedIfMoved(target);
     x = clampX(target);
     cat.style.transition = ms ? `transform ${ms}ms ${easing}` : 'none';
     cat.style.transform = `translateX(${x}px)`;
   }
   function freeze() {
-    const m = new DOMMatrixReadOnly(getComputedStyle(cat).transform);
-    moveTo(m.m41);
+    // Keep Pip exactly where it is (even inside the bed); no clamping here.
+    x = new DOMMatrixReadOnly(getComputedStyle(cat).transform).m41;
+    cat.style.transition = 'none';
+    cat.style.transform = `translateX(${x}px)`;
   }
   function bodyMove(name) {
     body.classList.remove('hop', 'startle', 'pounce', 'happy');
@@ -153,7 +166,13 @@ export function createCat({ lane, board }) {
   }
   function clearToys() { for (const toy of [...toys]) removeToy(toy); }
 
+  // Leaving the bed's spot (by walking or a pounce) means leaving the bed.
+  function leftBedIfMoved(target) {
+    if (inBed() && target > bedX() + 12) { cat.classList.remove('in-bed'); bedActive = false; return true; }
+    return false;
+  }
   async function walkTo(target, tok, speed = 55) {
+    if (leftBedIfMoved(target)) bodyMove('hop');
     target = clampX(target);
     const distance = target - x;
     if (Math.abs(distance) < 3) return;
@@ -163,6 +182,24 @@ export function createCat({ lane, board }) {
     moveTo(target, ms);
     await wait(ms, tok);
     setMode();
+  }
+  async function goToBed(tok) {
+    if (inBed()) return;
+    bedActive = true;
+    if (reduce.matches) moveTo(bedX());
+    else await walkTo(bedX(), tok, 60);
+    cat.classList.add('in-bed');
+    // Turn around a couple of times before settling, like cats do.
+    setPose('stand');
+    for (let i = 0; i < 2; i++) { await wait(330, tok); face(-facing); }
+    await wait(250, tok);
+  }
+  async function leaveBed(tok) {
+    if (!inBed()) return;
+    cat.classList.remove('in-bed');
+    bodyMove('hop');
+    bedActive = false;
+    await walkTo(BED_W + rand(20, 110), tok);
   }
   async function wakeUp(tok) {
     napping = false; stopZs();
@@ -190,19 +227,22 @@ export function createCat({ lane, board }) {
       await wait(800, tok);
     },
     async nap(tok) {
+      await goToBed(tok);
       await behaviors.yawn(tok, true);
       setPose('nap'); setMode(); napping = true; startZs();
       try { await wait(rand(25000, 50000), tok); }
       finally { stopZs(); }
       await wakeUp(tok);
       await wait(1200, tok);
+      // Sometimes stay sitting in the bed for a while.
+      if (Math.random() < .5) await leaveBed(tok);
     },
     async yarn(tok, forceKnock = false) {
       const knock = forceKnock || Math.random() < .35;
       const ball = addToy(Object.assign(document.createElement('div'), { className: 'cat-yarn' }));
       const ballSize = 15;
       let bx = clampBall(rand(0, lane.clientWidth));
-      function clampBall(v) { return Math.min(lane.clientWidth - ballSize, Math.max(0, v)); }
+      function clampBall(v) { return Math.min(lane.clientWidth - ballSize, Math.max(BED_W + 4, v)); }
       const rollTo = (nx, ms) => { bx = clampBall(nx); ball.style.transition = `transform ${ms}ms cubic-bezier(.15,.7,.3,1)`; ball.style.transform = `translateX(${bx}px) rotate(${bx * 5}deg)`; };
       rollTo(bx, 0);
       try {
@@ -211,8 +251,8 @@ export function createCat({ lane, board }) {
         for (let i = 0; i < rounds; i++) {
           const last = i === rounds - 1;
           let side = bx + ballSize / 2 > x + catWidth() / 2 ? 1 : -1;
-          // To knock it off, bat it toward the nearer end of the ledge.
-          if (last && knock) side = bx + ballSize / 2 > lane.clientWidth / 2 ? 1 : -1;
+          // To knock it off, bat it off the far end (away from the bed).
+          if (last && knock) side = 1;
           // Stop with the nose just touching the ball.
           await walkTo(side > 0 ? bx - catWidth() * .86 : bx + ballSize - catWidth() * .14, tok, 75);
           face(side); setPose('stand'); setMode('crouch');
@@ -256,6 +296,8 @@ export function createCat({ lane, board }) {
     },
     // Kneading the ledge ("making biscuits"); often ends in a nap.
     async knead(tok) {
+      // Near the bed, knead the cushion instead of the ledge.
+      if (inBed() || x < BED_W + 170) await goToBed(tok);
       setPose('stand'); setMode('kneading');
       if (Math.random() < .6) say('prrr', 2000);
       await wait(rand(3000, 5000), tok);
@@ -301,8 +343,8 @@ export function createCat({ lane, board }) {
       ? [['sit', 3], ['groom', 1], ['nap', sleepy ? 4 : 1]]
       : [['wander', 4], ['sit', 3], ['groom', 1.5], ['yarn', 1.2], ['butterfly', .9], ['knead', .8], ['yawn', .8], ['nap', sleepy ? 7 : .3]];
     let roll = Math.random() * options.reduce((sum, [, w]) => sum + w, 0);
-    for (const [name, weight] of options) if ((roll -= weight) <= 0) return behaviors[name];
-    return behaviors.sit;
+    for (const [name, weight] of options) if ((roll -= weight) <= 0) return name;
+    return 'sit';
   }
 
   async function loop() {
@@ -310,7 +352,12 @@ export function createCat({ lane, board }) {
     while (enabled) {
       if (reaction) { await reaction; continue; }
       const tok = token;
-      try { await chooseBehavior()(tok); }
+      try {
+        const name = chooseBehavior();
+        // These are fine to do in the bed; anything else, step out first.
+        if (inBed() && !['sit', 'groom', 'yawn', 'knead', 'nap'].includes(name)) await leaveBed(tok);
+        await behaviors[name](tok);
+      }
       catch (error) { if (error !== ABORT) { console.error(error); await new Promise(r => setTimeout(r, 1000)); } }
     }
     running = false;
@@ -334,7 +381,7 @@ export function createCat({ lane, board }) {
 
   const reactions = {
     placed({ col }) {
-      if (napping || reduce.matches || Math.random() > .3) return;
+      if (napping || inBed() || reduce.matches || Math.random() > .3) return;
       interrupt(async tok => {
         const center = (col + .5) * lane.clientWidth / 9;
         await walkTo(center - catWidth() / 2, tok, 95);

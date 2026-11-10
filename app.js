@@ -295,4 +295,13 @@ debugFromHash();
 save(); render();
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => { $('save-state').textContent = 'Offline setup unavailable'; });
+  // When a newly deployed version takes over, reload once so this page uses it.
+  // (Skipped on the very first install, when there was no previous version.)
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloading) return;
+    reloading = true;
+    location.reload();
+  });
 }

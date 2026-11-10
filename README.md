@@ -8,7 +8,7 @@ Use the header’s **Theme** picker for Forest, Bright blue, or Lavender, plus h
 
 **Settings** (next to Theme) adjusts number size (70–140%), cell line thickness, and 3×3 box line thickness. Changes preview live on the board and are saved on this device.
 
-**Pip the cat** lives on top of the board: it wanders, grooms, naps (more when you're idle), bats a ball of yarn (occasionally right off the edge), stalks butterflies, makes biscuits, and yawns before naps. It reacts to wrong moves, sometimes comes to look at the square you just filled, and celebrates when you finish. Tap it to purr or wake it. Turn it off with **Cat companion** in Settings.
+**Pip the cat** lives on top of the board: it wanders, grooms, naps (more when you're idle), bats a ball of yarn (occasionally right off the edge), stalks butterflies, makes biscuits (on its bed when it's nearby), and naps curled up on its folded blanket at the left end of the board. It reacts to wrong moves, sometimes comes to look at the square you just filled, and celebrates when you finish. Tap it to purr or wake it. Turn it off with **Cat companion** in Settings.
 
 - Choose a number, then tap a square to place it. **Every instance of the selected number lights up**, including starting clues and your entries.
 - An incorrect number flashes the square and board border red and announces an error. The incorrect entry is not kept.
@@ -64,7 +64,7 @@ Official iPad guide: https://support.apple.com/en-gb/guide/ipad/ipad8f1f7a29/ipa
 
 The service worker precaches the app shell, game code, manifest, and PNG icons. After the initial successful online installation, the game and newly generated puzzles work offline. Local progress survives reloads and app restarts when browser storage is available. Private browsing, storage eviction, or cleared site data can remove offline files and saves.
 
-When changing shipped assets, **increment `CACHE` in `sw.js`** (for example, `sudoku-static-v2`) before deploying. Assets are cache-first to keep each installed version consistent. New workers wait until all old app windows/tabs close, then activate the new cache and delete old Sudoku caches. Reopen the app after closing its windows to receive the update. A failed precache leaves the existing installed version intact.
+Updates are automatic: `npm run build` stamps the service worker's cache name with a hash of the app files, so every deploy with changed assets installs a new worker. Files are fetched network-first (revalidated with the server) and the offline copy is refreshed as you play; the cache is only used when offline. When a new version takes over, an open page reloads itself once. (Coming from the older cache-first version, the first reload after deploying still shows the old copy; reload once more.)
 
 Use HTTPS in production. `localhost` is allowed for local testing, but an iPad visiting a computer's plain HTTP LAN address cannot install the service worker reliably; test the deployed HTTPS URL instead.
 
@@ -79,6 +79,6 @@ Before release on a physical iPad:
 - Reload and verify the puzzle and history persist.
 - Install via Safari and launch from the Home Screen; verify Safari chrome is absent.
 - After one online load, close the app, enable Airplane Mode, and reopen it. Verify existing and new puzzles work.
-- Reconnect, deploy an incremented cache version, close all app windows, and reopen to verify the update.
+- Reconnect, deploy a change, and reload to verify the update appears.
 
 Browser viewport checks do not replace an actual iPadOS installation/offline test.

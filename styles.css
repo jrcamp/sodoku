@@ -278,3 +278,17 @@ dialog[open]::backdrop{animation:backdrop-in .2s ease-out}
 .cat.kneading .pose-stand .head{transform-origin:0% 100%;animation:cat-knead-head .9s ease-in-out infinite alternate}
 @keyframes cat-knead{from{transform:translateY(0)}to{transform:translateY(-5px)}}
 @keyframes cat-knead-head{from{transform:rotate(3deg)}to{transform:rotate(6deg)}}
+
+/* Pip's bed: a folded blanket in the theme's colors; Pip lies on top of it. */
+.cat-bed{position:absolute;left:0;bottom:-2px;width:84px;height:12px;pointer-events:none}
+.cat-bed svg{display:block;width:100%;height:100%;overflow:visible}
+.cat-bed-back{z-index:1}
+.cat{z-index:2}
+.cat-yarn,.cat-butterfly{z-index:2}
+.cat-flip{transition:translate .35s ease}
+.cat.in-bed .cat-flip{translate:0 -8px}
+.blanket-top{fill:color-mix(in srgb,var(--accent) 42%,var(--paper))}
+.blanket-under{fill:color-mix(in srgb,var(--accent) 62%,var(--paper))}
+.blanket-stripe{fill:none;stroke:var(--paper);stroke-opacity:.55;stroke-width:.9;stroke-linecap:round}
+.blanket-fold{fill:none;stroke:color-mix(in srgb,var(--accent) 75%,var(--paper));stroke-width:1.2;stroke-linecap:round}
+.blanket-fringe{fill:none;stroke:color-mix(in srgb,var(--accent) 55%,var(--paper));stroke-width:.8;stroke-linecap:round}
